@@ -1,0 +1,178 @@
+/* Basic styling for the Byte‑Sized Brains prototype */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f7f8fa;
+  color: #333;
+}
+
+header {
+  background: linear-gradient(135deg, #6b8de3, #8e9bf5);
+  color: #fff;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  letter-spacing: 0.5px;
+}
+
+.tagline {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  font-weight: 300;
+}
+
+nav {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav li {
+  margin: 0 1rem;
+}
+
+nav a {
+  display: block;
+  padding: 1rem;
+  color: #333;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+nav a:hover {
+  color: #6b8de3;
+}
+
+main {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+#challenge {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+#challenge h2 {
+  margin-top: 0;
+}
+
+.question {
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.options-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.options-list li {
+  background-color: #f2f4ff;
+  border: 1px solid #dbe1ff;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.options-list li:hover {
+  background-color: #e8edff;
+}
+
+.options-list li.disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.options-list li.correct {
+  background-color: #d5f5d1;
+  border-color: #a5e8a0;
+  color: #225e14;
+}
+
+.options-list li.incorrect {
+  background-color: #fddddd;
+  border-color: #f2bdbd;
+  color: #a52727;
+}
+
+.show-answer {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background-color: #6b8de3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.show-answer:hover {
+  background-color: #536fbe;
+}
+
+.answer {
+  margin-top: 1rem;
+  font-style: italic;
+  color: #4a4a4a;
+}
+
+.answer.hidden {
+  display: none;
+}
+
+.scoreboard {
+  margin-top: 1.5rem;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 1rem;
+}
+
+.scoreboard h3 {
+  margin-top: 0;
+}
+
+#ads {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+#ads .ad {
+  background-color: #f0f0f0;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  width: calc(50% - 1rem);
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: #666;
+}
