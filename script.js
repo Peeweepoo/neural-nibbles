@@ -1,150 +1,160 @@
-// Byte‑Sized Brains puzzle logic
-// A list of puzzles.  Each puzzle has a question, an array of options and the index
-// of the correct option.  You can extend this list with more entries; the
-// `getTodayIndex` function will select a puzzle based on the current date.
-const puzzles = [
-  {
-    question: "Which number completes the pattern: 2, 4, 6, ?, 10?",
-    options: ["7", "8", "9", "12"],
-    answerIndex: 1,
-    explanation: "The pattern is even numbers increasing by 2."
-  },
-  {
-    question: "What word becomes shorter when you add two letters to it?",
-    options: ["Short", "Tall", "Tiny", "Large"],
-    answerIndex: 0,
-    explanation: "Adding \"er\" to \"short\" makes \"shorter\"."
-  },
-  {
-    question: "A farmer has 17 sheep and all but 9 die. How many are left?",
-    options: ["8", "9", "17", "None"],
-    answerIndex: 1,
-    explanation: "All but nine die, so nine remain."
-  },
-  {
-    question: "Which planet is known as the Red Planet?",
-    options: ["Venus", "Mars", "Jupiter", "Saturn"],
-    answerIndex: 1,
-    explanation: "Mars is often called the Red Planet."
-  },
-  {
-    question: "If you rearrange the letters of 'LISTEN', you get another English word. What is it?",
-    options: ["Silent", "Listen", "Inlets", "Tinsel"],
-    answerIndex: 0,
-    explanation: "'Silent' uses all the letters in 'listen'."
-  }
+// script.js
+// This file contains the logic for the simple beat sequencer and melody keyboard.
+
+// Configuration for our instruments. Each entry has a human‑readable label and a URL
+// pointing to a drum sample hosted on the Tone.js website. You can swap these
+// URLs for your own sounds if you wish.
+const instruments = [
+  { name: 'kick', label: 'Kick', url: 'https://tonejs.github.io/audio/drum-samples/breakbeat808/kick.wav' },
+  { name: 'snare', label: 'Snare', url: 'https://tonejs.github.io/audio/drum-samples/breakbeat808/snare.wav' },
+  { name: 'hihat', label: 'Hi‑Hat', url: 'https://tonejs.github.io/audio/drum-samples/breakbeat808/hh_closed.wav' },
+  { name: 'clap', label: 'Clap', url: 'https://tonejs.github.io/audio/drum-samples/breakbeat808/clap.wav' },
 ];
 
-// Choose a puzzle index based on today's date.  Converting the date string to
-// a number provides a simple deterministic seed so everyone sees the same
-// puzzle on a given day.
-function getTodayIndex() {
-  const now = new Date();
-  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
-  const num = parseInt(dateStr, 10);
-  return num % puzzles.length;
-}
+// Number of steps in the sequencer (8 steps = two beats of 16th notes at 4/4 time).
+const steps = 8;
 
-// Load today’s puzzle into the DOM and attach event handlers for the options
-// and reveal button.
-function loadPuzzle() {
-  const idx = getTodayIndex();
-  const puzzle = puzzles[idx];
-  const questionEl = document.getElementById("puzzle-question");
-  const optionsList = document.getElementById("options-list");
-  const answerEl = document.getElementById("puzzle-answer");
-  const revealButton = document.getElementById("show-answer");
+// A two‑dimensional array representing which steps are active for each instrument.
+// Each row corresponds to an instrument, each column to a step.
+const pattern = instruments.map(() => Array(steps).fill(false));
 
-  questionEl.textContent = puzzle.question;
-  answerEl.textContent = `Answer: ${puzzle.options[puzzle.answerIndex]} – ${puzzle.explanation}`;
-  answerEl.classList.add("hidden");
+// Player objects for each instrument will be stored here after loading.
+const players = {};
 
-  // Clear previous options
-  optionsList.innerHTML = "";
+// Tone.js synthesizer for the piano keyboard.
+const synth = new Tone.Synth({
+  oscillator: { type: 'triangle' },
+  envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
+}).toDestination();
 
-  // Create list items for each option
-  puzzle.options.forEach((option, i) => {
-    const li = document.createElement("li");
-    li.textContent = option;
-    li.className = "option";
-    li.dataset.index = i;
-    li.addEventListener("click", () => handleAnswer(puzzle, i, li));
-    optionsList.appendChild(li);
+// Notes for the keyboard. These are common white keys spanning one octave.
+const keyboardNotes = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
+
+// Entry point once the DOM has finished loading.
+async function init() {
+  // Preload drum samples into Tone.Player objects.
+  instruments.forEach((inst) => {
+    players[inst.name] = new Tone.Player(inst.url).toDestination();
   });
 
-  // Reveal button shows the answer without affecting stats
-  revealButton.onclick = () => {
-    answerEl.classList.remove("hidden");
-  };
+  // Build the sequencer grid in the DOM.
+  buildSequencerGrid();
+  // Set up control handlers for play/stop and tempo.
+  setupControls();
+  // Build the melody keyboard.
+  buildKeyboard();
 }
 
-// Handle answer selection
-function handleAnswer(puzzle, selectedIndex, liElement) {
-  // Prevent multiple selections
-  const optionsList = document.getElementById("options-list");
-  optionsList.querySelectorAll("li").forEach((li) => {
-    li.removeEventListener("click", () => {});
-    li.classList.add("disabled");
-  });
+// Dynamically create the sequencer grid based on the instruments and steps.
+function buildSequencerGrid() {
+  const gridEl = document.getElementById('grid');
+  instruments.forEach((inst, rowIndex) => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'row';
 
-  const answerEl = document.getElementById("puzzle-answer");
-  answerEl.classList.remove("hidden");
+    // Label for the instrument (e.g. "Kick", "Snare").
+    const labelEl = document.createElement('div');
+    labelEl.className = 'label';
+    labelEl.textContent = inst.label;
+    rowEl.appendChild(labelEl);
 
-  if (selectedIndex === puzzle.answerIndex) {
-    liElement.classList.add("correct");
-    updateScore(true);
-  } else {
-    liElement.classList.add("incorrect");
-    // Highlight the correct answer
-    const correctLi = optionsList.children[puzzle.answerIndex];
-    correctLi.classList.add("correct");
-    updateScore(false);
-  }
-}
+    // Create each step cell for this row.
+    for (let step = 0; step < steps; step++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.row = rowIndex;
+      cell.dataset.step = step;
 
-// Update the user's stats stored in localStorage and refresh the scoreboard
-function updateScore(correct) {
-  const today = new Date().toISOString().slice(0, 10);
-  let streak = parseInt(localStorage.getItem("streak") || "0", 10);
-  let correctCount = parseInt(localStorage.getItem("correctCount") || "0", 10);
-  const lastDate = localStorage.getItem("lastDate");
+      // Toggle active state on click.
+      cell.addEventListener('click', () => {
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.step);
+        pattern[row][col] = !pattern[row][col];
+        cell.classList.toggle('active', pattern[row][col]);
+      });
 
-  if (correct) {
-    correctCount += 1;
-    // If the user answered correctly on consecutive days, increment the streak
-    if (lastDate) {
-      const diffDays = Math.floor((new Date(today) - new Date(lastDate)) / 86400000);
-      if (diffDays === 1) {
-        streak += 1;
-      } else if (diffDays === 0) {
-        // same day; do not change streak
-      } else {
-        streak = 1;
-      }
-    } else {
-      streak = 1;
+      rowEl.appendChild(cell);
     }
-    localStorage.setItem("lastDate", today);
-    localStorage.setItem("streak", streak.toString());
-    localStorage.setItem("correctCount", correctCount.toString());
-  } else {
-    // Incorrect answer resets the streak but still updates lastDate
-    localStorage.setItem("lastDate", today);
-    localStorage.setItem("streak", "0");
-  }
-  updateScoreboard();
+    gridEl.appendChild(rowEl);
+  });
 }
 
-// Refresh the scoreboard display from localStorage
-function updateScoreboard() {
-  const streak = localStorage.getItem("streak") || "0";
-  const correctCount = localStorage.getItem("correctCount") || "0";
-  document.getElementById("streak").textContent = streak;
-  document.getElementById("correct-count").textContent = correctCount;
+// Set up the play/stop buttons and tempo slider.
+function setupControls() {
+  const playBtn = document.getElementById('play');
+  const stopBtn = document.getElementById('stop');
+  const tempoSlider = document.getElementById('tempo');
+  const tempoValue = document.getElementById('tempo-value');
+
+  // Highlight the current step at each interval and trigger samples.
+  let currentIndex = 0;
+  Tone.Transport.scheduleRepeat((time) => {
+    highlightStep(currentIndex);
+    instruments.forEach((inst, row) => {
+      if (pattern[row][currentIndex]) {
+        players[inst.name].start(time);
+      }
+    });
+    currentIndex = (currentIndex + 1) % steps;
+  }, '16n');
+
+  // Start playback: initialize the audio context (Tone.start), reset the index and update buttons.
+  playBtn.addEventListener('click', async () => {
+    await Tone.start();
+    currentIndex = 0;
+    Tone.Transport.start();
+    playBtn.disabled = true;
+    stopBtn.disabled = false;
+  });
+
+  // Stop playback and reset highlights.
+  stopBtn.addEventListener('click', () => {
+    Tone.Transport.stop();
+    currentIndex = 0;
+    clearStepHighlight();
+    playBtn.disabled = false;
+    stopBtn.disabled = true;
+  });
+
+  // Update tempo when slider changes.
+  tempoSlider.addEventListener('input', () => {
+    const bpm = parseInt(tempoSlider.value);
+    Tone.Transport.bpm.value = bpm;
+    tempoValue.textContent = bpm;
+  });
 }
 
-// Initialize the page once the DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-  loadPuzzle();
-  updateScoreboard();
-});
+// Create the on‑screen keyboard and attach click handlers.
+function buildKeyboard() {
+  const pianoEl = document.getElementById('piano');
+  keyboardNotes.forEach((note) => {
+    const keyEl = document.createElement('div');
+    keyEl.className = 'key';
+    keyEl.textContent = note.replace(/\d/, ''); // display only the note letter
+    // Use mousedown to trigger attack; Chrome requires user gesture to start audio.
+    keyEl.addEventListener('mousedown', async () => {
+      await Tone.start();
+      synth.triggerAttackRelease(note, '8n');
+    });
+    pianoEl.appendChild(keyEl);
+  });
+}
+
+// Highlight the current step across all rows.
+function highlightStep(step) {
+  clearStepHighlight();
+  const cells = document.querySelectorAll(`.cell[data-step="${step}"]`);
+  cells.forEach((cell) => {
+    cell.classList.add('current');
+  });
+}
+
+// Remove the highlight from any previously active step.
+function clearStepHighlight() {
+  document.querySelectorAll('.cell.current').forEach((cell) => {
+    cell.classList.remove('current');
+  });
+}
+
+// Kick off our initialization after the DOM is ready.
+window.addEventListener('DOMContentLoaded', init);
