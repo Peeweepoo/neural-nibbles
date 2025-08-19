@@ -1,27 +1,28 @@
-# Simple Beat & Melody Maker
+# Beat Maker Studio
 
-This directory contains a simple web application that lets you create drum loops and play melodies directly in your browser. The project is intentionally lightweight and does not rely on any build system—just open `index.html` in a modern browser to get started.
+This directory contains an enhanced beat and melody maker that lets you craft full 16‑step drum loops and play melodies across two octaves. The interface stays simple to use but provides enough range to create professional‑sounding sequences.
 
 ## Features
 
-* **Step Sequencer** – A four‑row sequencer with eight steps per measure. Toggle cells to activate drum hits for kick, snare, hi‑hat and clap samples. Adjust the tempo with the built‑in slider and start/stop playback with the buttons.
-* **Melody Keyboard** – An on‑screen keyboard with eight notes (C4–C5). Click keys to play melodies using a simple synth.
-* **Responsive Design** – The interface adapts to small screens by resizing the sequencer cells and piano keys.
-* **No External Dependencies** – Aside from the Tone.js library loaded via CDN, all code is contained in this folder. You do not need Node.js or a build step to run it.
+* **16‑Step Drum Sequencer** – Four rows (kick, snare, hi‑hat and clap) with sixteen steps per measure allow you to build complex patterns. Toggle cells to activate hits; the step currently being played is highlighted.
+* **Tempo Control & Transport** – Adjust BPM from 60–180 with a slider. Dedicated Play and Stop buttons control playback. Samples are preloaded asynchronously, and a loading overlay is shown while preparing.
+* **Two‑Octave PolySynth Keyboard** – An on‑screen keyboard covering notes C4 through C6 triggers notes using a polyphonic synthesizer, allowing chords and richer melodies.
+* **Responsive and Accessible UI** – A modern dark theme with responsive sizing and clear visual feedback. The layout adapts to smaller screens.
+* **No Build Tools Required** – Everything runs in the browser. Tone.js is loaded via CDN; just open `index.html` to start creating.
 
 ## Usage
 
-1. Download or clone this repository and navigate into the `beat_maker_site` folder.
-2. Open `index.html` in a modern desktop browser (Chrome, Firefox, Edge or Safari). The Web Audio API does not function in some mobile browsers, so for best results use a desktop environment.
-3. Click on cells in the sequencer grid to activate or deactivate drum hits. Press **Play** to start the loop and **Stop** to stop it. Adjust the **Tempo** slider to change the speed.
-4. Click the keys in the melody section to play notes. Each note triggers a short sound using a simple synthesizer.
+1. Download or clone this folder and open `index.html` in a modern desktop browser (Chrome, Firefox, Edge or Safari).
+2. Wait for the “Loading samples…” overlay to disappear—drum samples are preloaded.
+3. Click cells in the sequencer grid to toggle hits. Press **Play** to start the loop and **Stop** to halt it. Use the tempo slider to change BPM.
+4. Play notes on the on‑screen keyboard to add melodies over your beat. You can play chords and single notes simultaneously.
 
 ## Customization
 
-* **Changing Samples** – If you want to use your own drum samples, update the `url` properties in `script.js` with links to your sound files.
-* **Adding/Removing Steps** – Modify the `steps` constant in `script.js` to increase or decrease the number of steps per measure. You’ll also need to adjust the CSS widths accordingly.
-* **Styling** – Edit `style.css` to change colors, sizing or typography to better match your brand.
+* **Change Samples** – Replace the `url` fields in `script.js` with URLs to your own drum samples.
+* **Adjust Steps** – Modify the `steps` constant in `script.js` to change pattern length. Update CSS cell widths accordingly.
+* **Styling Tweaks** – Edit `style.css` to customize colors, fonts and sizes.
 
 ## Credits
 
-This project uses the [Tone.js](https://tonejs.github.io/) library to handle audio synthesis and precise scheduling. Drum samples are pulled from the official Tone.js sample set.
+Built with [Tone.js](https://tonejs.github.io/) for audio scheduling and synthesis.
