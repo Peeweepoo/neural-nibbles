@@ -171,3 +171,11 @@ function triggerDrum(name, time) {
 }
 
 // 
+
+
+// Start the app when the DOM is ready
+if (document.readyState !== 'loading') {
+  init();
+} else {
+  document.addEventListener('DOMContentLoaded', init);
+}
